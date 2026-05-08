@@ -21,6 +21,8 @@ On `/gnm-interview` invocation:
 
 Short identifying questions only. No structure yet.
 
+> **B1 is unconditional and always fires first.** Never infer language from chat context, never default based on the user's invocation message, never skip even if a previous `spec.json` exists with `lang` set. If resuming, still confirm: "Tiếp tục bằng Tiếng Việt? Or switch to English?" Language is a session-level choice the user must make explicitly each time — failing to ask is the most reliable way to ship the wrong B2 suffix.
+
 | # | EN | VI | Validation | Spec field |
 |---|---|---|---|---|
 | B1 | "English or Tiếng Việt?" | (same) | enum `en` / `vi` | `session.lang` |

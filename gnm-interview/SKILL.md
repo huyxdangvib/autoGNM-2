@@ -29,7 +29,7 @@ The user provides domain knowledge. The AI provides structure. After each meanin
    - `references/level-taxonomy.md` — integer-level + `is_final` rules
    - `references/glossary-vi.md` — only when `session.lang == "vi"`
 
-3. **Phase 1 (B1–B4)** — short bootstrap questions (lang, purpose, code, name). One at a time.
+3. **Phase 1 (B1–B4)** — short bootstrap questions (lang, purpose, code, name). One at a time. **B1 (language) is unconditional and always fires first** — never inferred from chat context, never skipped on resume. If the user already wrote in Vietnamese before invoking the skill, still ask. Confirming language explicitly prevents the wrong B2 suffix (Final vs Cuối) and the wrong-language interview flow.
 
 4. **Phase 2 (Domain Discovery)** — ask 2–4 open-ended **domain** questions to gather enough context to propose Zone 1 + Zone 2. Stop when you can propose with reasonable confidence. Don't drag it out.
 
