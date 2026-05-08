@@ -34,29 +34,41 @@ After B4: tell user "L1 (root); cascade is v2." No render yet — renderer needs
 
 ## Phase 2 — Domain discovery (D-questions)
 
-The AI asks 2–4 open-ended questions about the **domain** of this GNM, not its structure. Just enough to propose Zone 1 + Zone 2 confidently.
+The AI asks 2–4 open-ended questions to gather enough context to propose Zone 1 + Zone 2 confidently.
 
-The AI **decides** which D-questions to ask based on the purpose statement from B2. Some templates:
+> **Framing rule:** every D-question must orient toward **business value / monetization** — how this thing helps the business make money, save money, reduce risk, or open new markets. Never frame around audience ("who uses it?"), org ("which team owns it?"), or operational lens ("what's the tech stack?"). A GNM is a strategy tool; org-based framing produces an org chart, not a strategy.
+
+Templates (all monetization-framed):
 
 | Template | Use when |
 |---|---|
-| "Who's the audience for this GNM? Who reads it, who acts on it?" | Always — drives perspective |
-| "What kinds of {topic-from-B2} does it cover? Give a few examples." | When topic is concrete (products, datasets, channels) |
-| "How is it organized today — by domain, by team, by lifecycle, or something else?" | When grouping is unclear |
-| "What's the daily/quarterly work that happens around this?" | Helps surface features (TODO axis) |
-| "What problems is this GNM helping people solve?" | When B2 was vague |
+| "How does this {topic} help the business make money — directly or indirectly? Where's the value created?" | Always — opens the monetization angle |
+| "Which revenue, cost, or risk levers does this touch?" | When B2 was abstract |
+| "If you had to defend this in a board meeting, what's the business-value pitch?" | When the user is stuck — forces the strategic frame |
+| "What's the monetization mechanism — revenue uplift, cost reduction, risk reduction, or new revenue stream?" | After the first answer, to sharpen |
+| "What outcomes signal this is working? What numbers move?" | Helps surface features (TODO axis) as outcome-driving actions |
 
-Stop asking when the AI feels it can propose Zone 1 + Zone 2 with reasonable confidence. **Don't drag this out.** Typical: 2 questions, sometimes 3, rarely 4.
+**Anti-templates — never use these:**
+- ❌ "Who's the audience? Who reads this?" → produces audience-based items
+- ❌ "Which teams own this?" → produces org-chart items
+- ❌ "What's the tech stack / data flow?" → produces operational items
+- ❌ "How is it organized today?" → bakes in the existing structure instead of designing one
 
-**Spec impact:** the AI writes a `session.domain_notes` (plain string, not a structural field) summarizing what it learned. This drives the propose step.
+The audience/team/tech may come up implicitly in the user's answers — that's fine — but the AI's organizing axis must be business-value, not org or audience.
+
+Stop asking when the AI can propose Z1+Z2 under monetization framing. Typical: 2 questions, sometimes 3, rarely 4.
+
+**Spec impact:** the AI writes `session.domain_notes` summarizing **business-value mechanisms** learned. This drives the propose step.
 
 ---
 
 ## Phase 3 — Zone 1 (propose → confirm)
 
 The AI proposes:
-- **Items** (4–7 by default) — concrete nouns drawn from D-question answers
-- **Perspective** (one phrase: "data domain", "customer segment", "lifecycle stage", …)
+- **Items** (4–7 by default) — concrete nouns framed by **business-value lens** (revenue impact area, monetization mechanism, value-chain stage). Never by audience or org.
+- **Perspective** (one phrase) — must name a *value lens*: e.g. "monetization technique", "revenue-impact area", "business-value pillar", "P&L lever". Not "team", "audience", "data domain" (these are operational).
+
+> **Self-check before proposing:** if the proposed items would just as easily appear on an org chart or audience map, redo the proposal under monetization framing. Example: for "AI & Data" department — wrong: {Research, Productization, Deployment}; right: {Revenue Uplift via Personalization, Cost Reduction via Automation, Risk Reduction via Fraud Detection, New AI-as-a-Service Revenue}.
 
 Format:
 ```
@@ -80,12 +92,13 @@ User options:
 - "let me list myself" → AI accepts user's list, but applies pushback triggers #2 (verbs) and #7 (mixed perspective) to the user's list
 
 Self-check before proposing (AI must apply triggers to its own proposal):
+- **Business-value framing** — items name P&L levers, monetization mechanisms, or revenue-impact areas (NOT teams, NOT audiences, NOT tech components)
 - No verb-items (trigger #2)
 - 2 ≤ count ≤ 7 (trigger #8)
-- Coherent perspective (trigger #7)
+- Coherent perspective (trigger #7) — perspective is a value lens
 - Not the same taxonomy AI plans to use for Z2 (trigger #3)
 
-If the AI can't satisfy these, it asks one more D-question instead of proposing.
+If the AI can't satisfy these, it asks one more D-question (monetization-framed) instead of proposing.
 
 **Spec fields:** `layout.n`, `zone1.items[].l1`, `zone1.perspective`.
 
@@ -108,10 +121,11 @@ Confirm/sửa/propose lại?
 ```
 
 Self-check before proposing:
+- **Value-creation framing** — features are actions/phases that *translate items to business outcomes* (e.g. Discover → Activate → Measure → Optimize; Acquire → Convert → Retain → Expand). NOT technical lifecycle (Ingestion → Modeling → Storage), NOT org phases (Plan → Build → Run).
 - f ≥ 2 (trigger #4 — never propose f=1)
 - Features are verbs/perspectives, not nouns (trigger #5)
 - Features aren't mirror of items (trigger #3)
-- Features form a coherent flow (lifecycle, pillars, temporal)
+- Features form a coherent business-value flow (value-creation arc, customer journey, P&L stages)
 
 User confirm → **[RENDER]** Z1 + Z2 frame, empty Z3.
 

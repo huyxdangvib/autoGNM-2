@@ -8,6 +8,23 @@ A GNM is a **WHAT × TODO** matrix. WHAT goes on Zone 1 (rows, items, nouns). TO
 
 The matrix is a **thinking tool**, not a record. Its purpose is to force the analyst to confront every WHAT × TODO intersection and decide what belongs there. Empty cells defeat the tool's purpose.
 
+## The framing axiom — business value, always
+
+Every GNM is a **strategy tool**. The organizing axes (Zone 1 items, Zone 2 features) must always be framed around **business value / monetization** — how the thing makes money, saves money, reduces risk, or opens new markets.
+
+**Wrong framings (produce documents, not strategy):**
+- Audience-based: "who reads this?" → produces a stakeholder map
+- Org-based: "which team owns this?" → produces an org chart
+- Operational: "what's the tech stack?" → produces a system diagram
+- Lifecycle-only: "Plan → Build → Run" → produces a project plan
+
+**Right framing — monetization mechanisms:**
+- Items as P&L levers: "Revenue Uplift via Personalization", "Cost Reduction via Automation", "Risk Reduction via Fraud Detection", "New Revenue via AI-as-a-Service"
+- Items as revenue-impact areas: "Retail Margin", "Corporate Fee Income", "Treasury NIM", "Risk Capital Release"
+- Features as value-creation arcs: "Discover → Activate → Measure → Optimize", "Acquire → Convert → Retain → Expand"
+
+The matrix CONTENT may end up similar across framings, but the FRAMING decides what gets emphasized vs. hidden. Wrong framing produces a chart that *describes* the org. Right framing produces a chart that *exposes the levers* the business can pull.
+
 ## Locked decision order
 
 Decisions at higher numbers depend on decisions at lower numbers. **Never skip backward.**
