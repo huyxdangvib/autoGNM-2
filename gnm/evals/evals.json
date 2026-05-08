@@ -1,0 +1,212 @@
+{
+  "skill_name": "gnm",
+  "version": "5.4.0",
+  "eval_count": 25,
+  "quality_dimensions": [
+    "structural_integrity", "taxonomy_quality", "feature_flow",
+    "zone3_density", "engine_naming", "cascade_coherence",
+    "decoding_quality", "domain_accuracy", "scope_appropriateness", "actionability"
+  ],
+  "evals": [
+    {
+      "id": 1, "type": "CREATE", "difficulty": "low",
+      "name": "Simple GNM: Retail Deposits (B)",
+      "prompt": "Tạo GNM cho Retail Deposits ở Level B, với 3 sản phẩm: Savings Account, Current Account, CASA. Feature duy nhất là Account Management.",
+      "expected": "Format A, f=1, n=3, L2=0, Zone 3: 3/3 cells filled, V-gate PASS",
+      "pass_criteria": { "v_gate": "PASS", "quality_min": 7.0, "zone3_completeness": "100%", "formula": "E5=B5 E8=B5" },
+      "fail_signals": ["zone3_empty_cells", "static_E5_E8", "wrong_column_count"]
+    },
+    {
+      "id": 2, "type": "CREATE", "difficulty": "medium",
+      "name": "Complex Multi-Feature: WB Lending (B)",
+      "prompt": "Tạo GNM cho Wholesale Banking Lending ở Level B, 3 sản phẩm (Working Capital, Medium-Long Term, LC/UPAS) và 3 Features (Origination, Risk Management, Portfolio Monitoring).",
+      "expected": "Format A, f=3, n=3, Zone 3: 9/9 cells, Feature flow: Origination→Risk→Monitoring, V-gate PASS",
+      "pass_criteria": { "v_gate": "PASS", "quality_min": 7.5, "zone3_completeness": "100%", "feature_flow": "sequential" },
+      "fail_signals": ["zone3_gaps", "features_unordered", "engine_code_duplicates"]
+    },
+    {
+      "id": 3, "type": "CREATE", "difficulty": "medium-high",
+      "name": "VIB Domain: Corporate Banking (B)",
+      "prompt": "Tạo GNM cho Corporate Banking Services ở Level B, với 4 sản phẩm: Transaction Banking, Lending, Investment Services, Liquidity Management. Features: Client Onboarding, Product Delivery, Risk Compliance. Sử dụng đúng thuật ngữ VIB.",
+      "expected": "Format A, f=3, n=4, Zone 3: 12/12, VIB terminology, domain_context=vib, V-gate PASS",
+      "pass_criteria": { "v_gate": "PASS", "quality_min": 8.0, "domain_match": true, "zone3_completeness": "100%" },
+      "fail_signals": ["generic_terms_not_vib", "domain_context_missing", "terminology_errors"]
+    },
+    {
+      "id": 4, "type": "CREATE", "difficulty": "medium",
+      "name": "Level A Overview: Retail Banking (A)",
+      "prompt": "Tạo GNM Level A cho Retail Banking Division với 3 Units: Consumer Lending, Deposits & Payments, Wealth Management. Feature: Divisional Strategies. Zone 3 chứa engines tham chiếu sub-GNMs Level B.",
+      "expected": "Format A, f=1, n=3, Zone 3: ALL engines (no values at Level A), HYPERLINK refs to B-level sheets",
+      "pass_criteria": { "v_gate": "PASS", "quality_min": 8.0, "zone3_type": "engines_only", "cascade_refs": true },
+      "fail_signals": ["values_in_zone3_at_level_A", "missing_level_B_refs"]
+    },
+    {
+      "id": 5, "type": "CREATE", "difficulty": "medium-high",
+      "name": "Level Z Detail: Mortgage Pricing (Z)",
+      "prompt": "Tạo GNM Level Z cho Mortgage Pricing, 4 sản phẩm (Fixed 1Y, Fixed 3Y, Fixed 5Y, Variable), 2 features (Rate Calculation, Margin Setting). Zone 3 chứa values định lượng: spread, floor rate, NIM target.",
+      "expected": "Format A, f=2, n=4, Zone 3: ALL quantitative values with [^n]/[EST] tags, V-gate PASS",
+      "pass_criteria": { "v_gate": "PASS", "quality_min": 8.0, "zone3_type": "values_only", "data_citations": true },
+      "fail_signals": ["engines_in_zone3_at_level_Z", "missing_citation_tags", "zone3_gaps"]
+    },
+    {
+      "id": 6, "type": "REVIEW", "difficulty": "low",
+      "name": "REVIEW — High-Quality GNM (no errors)",
+      "prompt": "Review the GNM Excel: WB Lending (B) — correct structure, all Zone 3 filled, proper formulas.",
+      "expected": "Format B, V-gate PASS, Quality ≥8.0, 0-2 minor observations only",
+      "pass_criteria": { "v_gate": "PASS", "quality_min": 8.0, "issue_count_max": 2, "no_false_positives": true },
+      "fail_signals": ["false_positive_issues", "v_gate_reported_fail_incorrectly"]
+    },
+    {
+      "id": 7, "type": "REVIEW", "difficulty": "medium-high",
+      "name": "REVIEW — Defective GNM (4 planted errors)",
+      "prompt": "Review GNM with errors: (1) 2 empty Zone 3 cells, (2) E5 static mismatch with B5, (3) missing Zone 4 consolidation, (4) incoherent feature in Zone 2.",
+      "expected": "Format B, V-gate FAIL, ≥3/4 errors detected, severity HIGH→MED→LOW, rule citations",
+      "pass_criteria": { "v_gate": "FAIL", "issues_detected_min": 3, "severity_ranking": true, "rule_citations": true },
+      "fail_signals": ["missed_errors_below_3", "false_v_gate_pass", "wrong_rule_citations"]
+    },
+    {
+      "id": 8, "type": "REVIEW", "difficulty": "medium",
+      "name": "REVIEW — Domain Terminology Errors",
+      "prompt": "Review GNM for Retail Banking using generic labels ('Consumer Product 1') instead of VIB terms ('Savings Account').",
+      "expected": "V-gate PASS (structure valid), domain_accuracy ≤6/10, terminology issues flagged",
+      "pass_criteria": { "v_gate": "PASS", "domain_issues_flagged": true, "domain_score_max": 6 },
+      "fail_signals": ["domain_issues_not_flagged", "domain_blind"]
+    },
+    {
+      "id": 9, "type": "MODIFY", "difficulty": "medium",
+      "name": "MODIFY — Add Feature to GNM",
+      "prompt": "Add Feature 'Portfolio Monitoring' to WB Lending (B) currently with 2 features (Origination, Risk Management).",
+      "expected": "Impact analysis, column shift G-H→G-I, Conso shift, 3 new Zone 3 cells, B2 merge extended",
+      "pass_criteria": { "zone3_completeness": "100%", "column_integrity": true, "formula_sync": true },
+      "fail_signals": ["zone3_gaps_in_new_column", "conso_not_shifted", "b2_merge_wrong"]
+    },
+    {
+      "id": 10, "type": "MODIFY", "difficulty": "medium",
+      "name": "MODIFY — Delete Item from GNM",
+      "prompt": "Remove 'Cards' from Retail Banking (B) with 4 items. Cards detail moved to separate Z-level GNM.",
+      "expected": "Row deletion, Zone 3 shrinks 4×2→3×2, All/Common rows shift up, merge ranges updated",
+      "pass_criteria": { "zone3_completeness": "100%", "row_integrity": true, "merge_ranges_updated": true },
+      "fail_signals": ["broken_formulas", "orphaned_rows", "all_common_misaligned"]
+    },
+    {
+      "id": 11, "type": "MODIFY", "difficulty": "medium-high",
+      "name": "MODIFY — Replace Feature (semantic change)",
+      "prompt": "Replace 'Risk Management' with 'Pricing & Margin Management' in Corporate Lending (B).",
+      "expected": "All engines in modified column reframed semantically, feature flow reassessed",
+      "pass_criteria": { "engine_semantic_alignment": true, "feature_flow_coherent": true, "zone3_logic": true },
+      "fail_signals": ["old_engines_unchanged", "semantic_mismatch", "flow_incoherence"]
+    },
+    {
+      "id": 12, "type": "CASCADE", "difficulty": "high",
+      "name": "CASCADE — 3-Sheet A→B→Z",
+      "prompt": "Create cascade: RBL(A) overview → MTG(B) mortgage detail → MTP(Z) mortgage pricing. With HYPERLINKs and backlinks.",
+      "expected": "3 sheets, per-sheet V-gate PASS, forward+back HYPERLINKs, 5-phase write order cross-sheet",
+      "pass_criteria": { "v_gate_all_sheets": "PASS", "quality_min": 8.0, "hyperlinks_functional": true, "cascade_coherence": 10 },
+      "fail_signals": ["any_sheet_v_gate_fail", "broken_hyperlinks", "orphan_engines", "write_order_per_sheet_not_cross"]
+    },
+    {
+      "id": 13, "type": "CASCADE_REVIEW", "difficulty": "medium-high",
+      "name": "CASCADE REVIEW — Validate 4-Sheet Cascade",
+      "prompt": "Validate existing 4-sheet cascade: RBB(A) → RBL(B) and WBB(B) → MTP(Z). Check DAG topology, per-sheet V-gate, hyperlinks.",
+      "expected": "Format B with DAG diagram, per-sheet V-gate status, aggregate quality scorecard",
+      "pass_criteria": { "v_gate_all_sheets": "PASS", "dag_valid": true, "no_orphans": true, "hyperlinks_all_work": true },
+      "fail_signals": ["broken_hierarchy", "orphan_sheet", "hyperlink_broken", "cycle_detected"]
+    },
+    {
+      "id": 14, "type": "GENERATE", "difficulty": "high",
+      "name": "GENERATE — Build Spec to Excel",
+      "prompt": "Generate Excel from Build Spec JSON: RBL(B), f=2, L2=0, n=3 (Mortgage, Auto, Personal), features (Origination, Monitoring).",
+      "expected": ".xlsx file, correct zone placement, E5=B5 formula, B2:I2 merge, canonical styling, V-gate PASS",
+      "pass_criteria": { "v_gate": "PASS", "schema_compliance": "100%", "formula_accuracy": true, "styling_fidelity": true },
+      "fail_signals": ["zone_misplacement", "formula_errors", "styling_wrong", "v_gate_fail"]
+    },
+    {
+      "id": 15, "type": "EXPLAIN", "difficulty": "low-medium",
+      "name": "EXPLAIN — Zone 3 Value Matrix Logic",
+      "prompt": "Giải thích Zone 3 trong GNM hoạt động thế nào? Tại sao phải đảm bảo không có ô trống? Dùng ví dụ Retail Banking.",
+      "expected": "Format D, WHAT×TODO intersection explained, MFM philosophy connected, concrete example, visual diagram",
+      "pass_criteria": { "concept_clarity": true, "mfm_connection": true, "example_concrete": true, "accessible_to_novice": true },
+      "fail_signals": ["concept_omission", "prescriptive_only_no_why", "jargon_heavy", "no_example"]
+    },
+    {
+      "id": 16, "type": "CONVERT", "difficulty": "medium",
+      "name": "CONVERT — Strategy Doc to GNM",
+      "prompt": "Convert this retail lending strategy document into a GNM Level B: Focus areas are Mortgage Growth, Auto Lending Expansion, Personal Loan Digitization. Each area has Origination and Monitoring functions.",
+      "expected": "Format A, f=2, n=3, Zone 1 from strategy themes, Zone 2 from functions, V-gate PASS",
+      "pass_criteria": { "v_gate": "PASS", "zone1_source": "strategy_doc", "zone2_coherent": true },
+      "fail_signals": ["zone1_not_from_source", "arbitrary_features", "structure_mismatch"]
+    },
+    {
+      "id": 17, "type": "CONVERT", "difficulty": "medium-high",
+      "name": "CONVERT — Level A to Level B Expansion",
+      "prompt": "Convert RBL(A) overview GNM to RBL(B) detail. A-level has 3 items with engine refs. Expand engines to values.",
+      "expected": "Zone 3 engines replaced with quantitative values, cascade ref maintained, Level field B",
+      "pass_criteria": { "zone3_type": "values", "cascade_ref": true, "level": "B" },
+      "fail_signals": ["engines_retained_at_B", "cascade_ref_lost", "wrong_level"]
+    },
+    {
+      "id": 18, "type": "DELETE", "difficulty": "medium",
+      "name": "DELETE — Remove Single Item",
+      "prompt": "Delete 'Cards' from Retail Banking (B) GNM with 4 items. Cards detail moved to separate Z-level.",
+      "expected": "Row removed, n=4->3, formulas updated, All/Common rows shifted, Zone 3 shrinks",
+      "pass_criteria": { "row_removed": true, "formula_sync": true, "merge_updated": true },
+      "fail_signals": ["broken_formulas", "orphaned_rows", "all_common_misaligned"]
+    },
+    {
+      "id": 19, "type": "DELETE", "difficulty": "medium-high",
+      "name": "DELETE — Archive Sheet in Cascade",
+      "prompt": "Archive POM(B) sheet from RCP cascade. Parent RCP(A) has HYPERLINK to POM(B).",
+      "expected": "[ARCHIVE] prefix added, parent hyperlink removed/updated, backlink removed",
+      "pass_criteria": { "archive_prefix": true, "parent_updated": true, "backlink_removed": true },
+      "fail_signals": ["no_archive_prefix", "parent_link_stale", "orphan_backlink"]
+    },
+    {
+      "id": 20, "type": "EXPORT", "difficulty": "medium",
+      "name": "EXPORT — GNM to JSON",
+      "prompt": "Export RBL(B) GNM to JSON schema for version control.",
+      "expected": "Format E, $schema:gnm-v1, zone1/zone2/zone3 keys, bidirectional fidelity",
+      "pass_criteria": { "schema_field": true, "all_zones_present": true, "format": "E" },
+      "fail_signals": ["missing_schema", "zone_data_loss", "wrong_format"]
+    },
+    {
+      "id": 21, "type": "EXPORT", "difficulty": "medium",
+      "name": "EXPORT — Build Spec JSON from GNM",
+      "prompt": "Generate Build Spec JSON from existing WBL(B) GNM for script-based regeneration.",
+      "expected": "Build Spec with layout params matching source, zone3 content preserved, gnm metadata",
+      "pass_criteria": { "layout_match": true, "zone3_preserved": true, "gnm_metadata": true },
+      "fail_signals": ["layout_mismatch", "zone3_data_loss", "missing_metadata"]
+    },
+    {
+      "id": 22, "type": "PREVIEW", "difficulty": "low-medium",
+      "name": "PREVIEW — ASCII GNM Layout",
+      "prompt": "Preview GNM structure for Corporate Banking (B) with 3 items, 2 features before generating.",
+      "expected": "Format F, ASCII table with column/row layout, zone map footer, V-gate line, Quality score",
+      "pass_criteria": { "format": "F", "ascii_table": true, "zone_map": true, "v_gate_line": true, "quality_score": true },
+      "fail_signals": ["no_ascii_table", "missing_zone_map", "no_quality_score"]
+    },
+    {
+      "id": 23, "type": "DIFF", "difficulty": "medium",
+      "name": "DIFF — Compare GNM Versions",
+      "prompt": "Compare WBL(B) January version (3 items, 2 features) with March version (4 items, 2 features).",
+      "expected": "Format G, [NEW]/[RETIRE]/[GAP]/[OK] tags, structural delta, quality delta",
+      "pass_criteria": { "format": "G", "tags_present": true, "structural_delta": true, "quality_comparison": true },
+      "fail_signals": ["missing_tags", "no_structural_analysis", "no_quality_delta"]
+    },
+    {
+      "id": 24, "type": "DIFF", "difficulty": "medium-high",
+      "name": "DIFF — Temporal Pair Comparison",
+      "prompt": "Compare As-Is vs To-Be for Digital Banking transformation GNM.",
+      "expected": "[AS-IS]/[TO-BE] naming, gap analysis with [GAP]/[OK]/[NEW]/[RETIRE], Zone 1 structural identity",
+      "pass_criteria": { "temporal_naming": true, "gap_analysis": true, "zone1_identity": true },
+      "fail_signals": ["no_temporal_tags", "zone1_structural_mismatch", "missing_gap_analysis"]
+    },
+    {
+      "id": 25, "type": "TRAIN", "difficulty": "low",
+      "name": "TRAIN — Module 1 Quiz",
+      "prompt": "Start GNM training Mode Module 1.",
+      "expected": "Socratic dialogue, concept explanation, exercise prompt, feedback signals, progress tracking",
+      "pass_criteria": { "socratic": true, "exercise_included": true, "feedback_signals": true },
+      "fail_signals": ["lecture_only", "no_exercise", "no_feedback"]
+    }
+  ]
+}

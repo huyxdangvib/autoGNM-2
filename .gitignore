@@ -1,0 +1,12 @@
+.DS_Store
+**/.DS_Store
+**/__pycache__/
+**/*.pyc
+
+# Skill runtime artifacts
+gnm-interview/workspace/
+gnm/gnm-workspace/
+
+# Local working files
+note.md
+*.xlsx
