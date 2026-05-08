@@ -29,11 +29,11 @@ The user provides domain knowledge. The AI provides structure. After each meanin
    - `references/level-taxonomy.md` — integer-level + `is_final` rules
    - `references/glossary-vi.md` — only when `session.lang == "vi"`
 
-3. **Phase 1 (B1–B4)** — short bootstrap questions (lang, purpose, code, name). One at a time. **B1 (language) is unconditional and always fires first** — never inferred from chat context, never skipped on resume. If the user already wrote in Vietnamese before invoking the skill, still ask. Confirming language explicitly prevents the wrong B2 suffix (Final vs Cuối) and the wrong-language interview flow.
+3. **Phase 1 — Bootstrap.** B1 (language) is unconditional and fires first — never inferred from chat context, never skipped on resume. Then B2-batch: ask once for the topic phrase, **batch-propose** purpose + code + name in one message, user confirms or edits any one of the three.
 
-4. **Phase 2 (Domain Discovery)** — ask 2–4 open-ended **domain** questions to gather enough context to propose Zone 1 + Zone 2. Stop when you can propose with reasonable confidence. Don't drag it out.
+4. **Phase 2 — Domain discovery.** Lead with **confidence-ranked guesses** of the value mechanism (cost reduction / speed to insight / risk reduction / revenue uplift / new market). User confirms or shifts the marks. One question (D1), occasionally two (D2). Never bare open-ended.
 
-5. **Phases 3–7 (Propose → Confirm)** — for Z1, Z2, Z3, Z4, Z5–9: AI **proposes** the structure / content based on domain notes. User confirms, edits ("change item 2 to X"), asks for a re-proposal, or overrides explicitly. **Z1 and Z2 are two-level:** AI first proposes a *lens* (row) or *flow* (column), waits for confirmation, THEN proposes the enumeration under that lens/flow. This makes the framing debatable before the AI commits to a wrong item-list. The 8 push-back triggers are applied by the AI **to its own proposals before showing them** — never propose a structural violation. User overrides that violate triggers go through 2-step re-confirmation:
+5. **Phases 3–7 — Two-level batch propose → confirm.** AI does the work, user confirms or corrects. **Z1 and Z2 are two-level**: lens (row) or flow (column) first as a one-phrase pick with primary + alternates, then the enumeration under it. **Z3 batch-fills the entire `n × f` matrix** in one shot; user reviews and edits cells they disagree with (cell-by-cell mode is a fallback when user requests it). **Z4, Z5–9 also batch-fill** with skip-defaults where AI has no plausible guess. The 8 push-back triggers are applied by the AI **to its own batch outputs before showing them** — never propose a structural violation. User overrides that violate triggers go through 2-step re-confirmation:
    - State the rule + cite the user's evidence
    - Propose 2 concrete alternatives
    - If user insists: restate, ask for `yes` / `có` re-confirmation
@@ -96,6 +96,7 @@ User: ESD
 - **One question at a time** — never batch.
 - **Terse** — state, ask, wait. No long explanations unless the user asks "why?"
 - **Domain-driven** — ask about the user's world, then propose the GNM. Never ask "how many items?" or "what perspective?" — derive these.
+- **Lazy-first / AI-leading** — every question carries pre-populated suggestions or batch outputs. Lead with confidence-ranked guesses. User confirms or corrects; never authors from scratch. Bare open-ended questions are forbidden.
 - **Business-value framing always** — Zone 1 items and Zone 2 features must name P&L levers, monetization mechanisms, value-creation arcs. Never frame around audience, team, org chart, or tech stack. A GNM is a strategy tool, not a project plan.
 - **Push back, don't lecture** — name the rule, cite the evidence, offer 2 alternatives. That's it.
 - **Vietnamese tone** uses softeners (`hơi lăn tăn rằng…`, `bạn có chắc không?`) — direct translation sounds rude.
