@@ -63,7 +63,24 @@ After confirm: tell user "L1 (root); cascade là v2." No render yet (renderer ne
 
 Goal: gather enough context to propose Z1 lens + items + Z2 flow + features. The AI **leads with confidence-ranked guesses**, not open-ended questions.
 
-> **Framing rule:** every guess and follow-up must orient toward **business value / monetization**. Never frame around audience, team, org, or tech stack. See `good-gnm-distilled.md` § "framing axiom".
+> **Framing rule:** lock the **intended audience** first (D0), then frame everything downstream in that audience's language. Exec audience → business / monetization lens. Practitioner audience → capability / teaching / workflow lens. Operator audience → process / value-stream lens. Customer audience → outcome / job-to-be-done lens. Don't default to monetization framing for non-business audiences. See `good-gnm-distilled.md` § "audience axiom".
+
+### D0 — Audience (lead with guess)
+
+Format:
+```
+Mình đoán GNM này dành cho:
+  ✓ Exec / business owner          (đọc để ra quyết định P&L)
+  · Practitioner (dev / analyst)   (đọc để học hoặc làm)
+  · Operator / ops team            (đọc để vận hành quy trình)
+  · Customer / external user       (đọc để hiểu outcome)
+
+Đúng không? Hay khác?
+```
+
+Audience drives every framing decision below. If audience changes mid-session, AI must re-propose Z1 lens / Z2 flow under the new audience.
+
+**Spec field:** `session.audience` (one of: `exec`, `practitioner`, `operator`, `customer`, or free-text).
 
 ### D1 — Value mechanism (lead with guess)
 
@@ -107,15 +124,22 @@ Rows decompose as *lens → items*. Lens first because it's debatable in one phr
 
 ### Phase 3.1 — Row lens (propose with primary + alternates)
 
-Candidate lenses:
+Candidate lenses (filter by audience locked at D0):
 
-| Lens | Use when |
-|---|---|
-| **P&L lever** | Topic touches revenue / cost / risk on a financial statement |
-| **Monetization technique** | Topic is a capability with multiple ways to convert into money |
-| **Revenue-impact area** | Topic spans business units or product lines that each generate revenue |
-| **Value-chain stage** | Topic is a horizontal capability supporting upstream/downstream |
-| **Customer-value pillar** | Topic is customer-facing; value emerges across customer segments |
+| Lens | Audience fit | Use when |
+|---|---|---|
+| **P&L lever** | exec | Topic touches revenue / cost / risk on a financial statement |
+| **Monetization technique** | exec | Topic is a capability with multiple ways to convert into money |
+| **Revenue-impact area** | exec | Topic spans business units or product lines that each generate revenue |
+| **Value-chain stage** | exec / operator | Horizontal capability supporting upstream/downstream |
+| **Customer-value pillar** | exec / customer | Customer-facing; value emerges across segments |
+| **Capability area** | practitioner | Roadmap / learning topic; rows are skills or domains to master |
+| **Concept cluster** | practitioner | Teaching / education topic; rows are concept families |
+| **Workflow stage** | practitioner / operator | Day-to-day work decomposes into stages |
+| **Process / value-stream stage** | operator | Operational topic decomposes into Acquire→…→Recover or similar |
+| **Outcome / JTBD** | customer | External-facing; rows are customer jobs-to-be-done |
+
+AI picks recommended lens(es) based on `session.audience` first, then `session.domain_notes`. Show 1 ✓ recommended + 2 alternates. If audience is `practitioner`, never recommend "P&L lever" as primary.
 
 Format:
 ```

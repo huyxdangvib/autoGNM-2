@@ -21,7 +21,9 @@ The user provides domain knowledge. The AI provides structure. After each meanin
    - Otherwise, create stub spec with `schema_version: "gnm-interview/1.0"`, `gnm.level: 1`, `gnm.is_final: true`.
    - Tell the user: live `.xlsx` will be at `workspace/current.xlsx`; recommend they keep it open.
 
-2. **Load references** (read into context once at session start):
+2. **Offer live preview.** On first render, suggest the user run `bash gnm-interview/scripts/serve.sh` in a second terminal and open `http://localhost:8765/current.html` — it auto-refreshes every 2s so they watch the GNM build in a browser tab. The `.xlsx` is still produced for download/share; the HTML is the live view.
+
+3. **Load references** (read into context once at session start):
    - `references/question-tree.md` — the canonical question sequence
    - `references/pushback-triggers.md` + `pushback-protocol.md` — when and how to push back
    - `references/good-gnm-distilled.md` — what makes a GNM good (drives soft AI judgement triggers)
@@ -80,7 +82,9 @@ User: ESD
 | Script | Purpose |
 |---|---|
 | `scripts/generate-gnm.py` | Forked from `/gnm`'s renderer; integer-level schema; produces canonical .xlsx |
-| `scripts/render.sh` | Wrapper with atomic rename for file-lock safety |
+| `scripts/render-html.py` | Live HTML preview mirroring the .xlsx; auto-refreshes every 2s |
+| `scripts/render.sh` | Wrapper — renders both `.xlsx` and `.html` with atomic rename |
+| `scripts/serve.sh` | Static HTTP server for `workspace/`. Tell user to open `http://localhost:8765/current.html` |
 
 ## Security
 
@@ -97,6 +101,6 @@ User: ESD
 - **Terse** — state, ask, wait. No long explanations unless the user asks "why?"
 - **Domain-driven** — ask about the user's world, then propose the GNM. Never ask "how many items?" or "what perspective?" — derive these.
 - **Lazy-first / AI-leading** — every question carries pre-populated suggestions or batch outputs. Lead with confidence-ranked guesses. User confirms or corrects; never authors from scratch. Bare open-ended questions are forbidden.
-- **Business-value framing always** — Zone 1 items and Zone 2 features must name P&L levers, monetization mechanisms, value-creation arcs. Never frame around audience, team, org chart, or tech stack. A GNM is a strategy tool, not a project plan.
+- **Audience-driven framing** — establish the GNM's intended audience first; Zone 1 / Zone 2 framing follows from that anchor. Exec audience → business / monetization lens (P&L levers, revenue/cost/risk). Practitioner audience (dev, analyst, designer) → capability / teaching / workflow lens. Operator audience → process / value-stream lens. Don't default to business framing for non-business audiences — it produces a chart the actual reader can't use.
 - **Push back, don't lecture** — name the rule, cite the evidence, offer 2 alternatives. That's it.
 - **Vietnamese tone** uses softeners (`hơi lăn tăn rằng…`, `bạn có chắc không?`) — direct translation sounds rude.

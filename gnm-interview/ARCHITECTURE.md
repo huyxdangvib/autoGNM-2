@@ -18,11 +18,14 @@ gnm-interview/
 │   └── glossary-vi.md              # VI translations + tone notes
 ├── scripts/                # L3: deterministic rendering
 │   ├── generate-gnm.py     # forked from gnm/scripts/generate-gnm.py
-│   └── render.sh           # wrapper — atomic rename, file-lock safe
+│   ├── render-html.py      # static HTML mirror of the .xlsx (auto-refresh 2s)
+│   ├── render.sh           # wrapper — atomic rename, emits both .xlsx + .html
+│   └── serve.sh            # `python -m http.server` for workspace/ on :8765
 └── workspace/              # runtime, gitignored
     ├── spec.json           # live Build Spec — single source of truth
     ├── transcript.md       # append-only Q&A log
-    └── current.xlsx        # latest render — user keeps this open
+    ├── current.xlsx        # latest render — user keeps this open
+    └── current.html        # live browser preview — open http://localhost:8765/current.html
 ```
 
 ## State model

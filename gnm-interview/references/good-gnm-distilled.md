@@ -8,34 +8,39 @@ A GNM is a **WHAT × TODO** matrix. WHAT goes on Zone 1 (rows, items, nouns). TO
 
 The matrix is a **thinking tool**, not a record. Its purpose is to force the analyst to confront every WHAT × TODO intersection and decide what belongs there. Empty cells defeat the tool's purpose.
 
-## The audience axiom — GNM is a standardized language
+## The audience axiom — framing follows the reader
 
-A GNM has **no target audience**. It is a *standardized language* designed so that **everyone** in the organization — analyst, executive, engineer, board member — can look at the same artifact and read the same idea. The whole point is universal legibility.
+A GNM is a communication artifact. It has **one intended audience**, and the organizing axes (Zone 1 items, Zone 2 features) must be framed in the language *that audience* uses to make decisions. There is no universal default lens.
 
-This means:
-- Never ask "who is this for?" — the answer is always "everyone, by design".
-- Never tailor items/features to a persona — that breaks the standardization.
-- Never accept "the operations team will find this useful" as a structural justification — that's a stakeholder argument, not a strategy argument.
-- If a GNM only makes sense to one team, it's wrong. Redo the framing.
+**Establish the audience first.** Phase 1 / Phase 2 must lock the audience before proposing structure. The AI batch-proposes a likely audience from the topic phrase; the user confirms or corrects.
 
-This axiom is upstream of the framing axiom below: framing must be business-value (universal language) instead of audience or org (single-reader optimization).
+| Audience | Right framing lens | Example items |
+|---|---|---|
+| Exec / business owner | Business / monetization (P&L levers, revenue, cost, risk) | "NIM optimization", "Fee income visibility", "RWA efficiency" |
+| Practitioner (developer, analyst, designer) | Capability / teaching / workflow | "LLM fundamentals", "Eval & quality", "Production deployment" |
+| Operator / ops team | Process / value-stream / lifecycle | "Originate", "Service", "Recover" |
+| Customer / external user | Outcome / job-to-be-done | "Get a loan", "Track my account", "Resolve an issue" |
 
-## The framing axiom — business value, always
+The matrix CONTENT may end up similar across audiences, but the FRAMING decides what gets emphasized vs. hidden. A GNM mapping bank functions for execs frames around P&L levers. A GNM outlining a developer's AI roadmap frames around concepts and capabilities to learn — using business-value framing there would produce a chart the actual reader can't use.
 
-Every GNM is a **strategy tool**. The organizing axes (Zone 1 items, Zone 2 features) must always be framed around **business value / monetization** — how the thing makes money, saves money, reduces risk, or opens new markets.
+## The framing axiom — match the audience
 
-**Wrong framings (produce documents, not strategy):**
-- Audience-based: "who reads this?" → produces a stakeholder map
-- Org-based: "which team owns this?" → produces an org chart
-- Operational: "what's the tech stack?" → produces a system diagram
-- Lifecycle-only: "Plan → Build → Run" → produces a project plan
+Once audience is fixed, every Zone 1 item and Zone 2 feature must be:
+- expressible in that audience's vocabulary (not borrowed from a different audience's lens),
+- consistent with one organizing perspective (Trigger #7),
+- a clear noun-axis (Z1) and verb/perspective-axis (Z2) the audience would recognize.
 
-**Right framing — monetization mechanisms:**
-- Items as P&L levers: "Revenue Uplift via Personalization", "Cost Reduction via Automation", "Risk Reduction via Fraud Detection", "New Revenue via AI-as-a-Service"
-- Items as revenue-impact areas: "Retail Margin", "Corporate Fee Income", "Treasury NIM", "Risk Capital Release"
-- Features as value-creation arcs: "Discover → Activate → Measure → Optimize", "Acquire → Convert → Retain → Expand"
+**Wrong framings (regardless of audience) — produce documents, not thinking tools:**
+- Mixed-perspective items: products + segments + regions on the same axis
+- Org-chart items: "Team A", "Team B" — that's a stakeholder map, not a matrix
+- Tech-stack items for non-technical audiences: produces a system diagram, not a strategy
+- Lifecycle-only items when the audience needs a strategic lens: produces a project plan
 
-The matrix CONTENT may end up similar across framings, but the FRAMING decides what gets emphasized vs. hidden. Wrong framing produces a chart that *describes* the org. Right framing produces a chart that *exposes the levers* the business can pull.
+**Right framing — pick the lens once, apply consistently:**
+- Items as P&L levers (exec audience): "Revenue Uplift via Personalization", "Cost Reduction via Automation"
+- Items as capability areas (practitioner audience): "Foundational concepts", "Tooling fluency", "Production craft"
+- Items as value-stream stages (operator audience): "Acquire → Convert → Retain → Expand"
+- Features as value-creation arcs: "Discover → Activate → Measure → Optimize"
 
 ## Locked decision order
 

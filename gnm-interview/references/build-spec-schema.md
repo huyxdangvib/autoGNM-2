@@ -42,6 +42,7 @@ The Build Spec is the single source of truth across interview turns. The AI read
 | Field | Type | Values |
 |---|---|---|
 | `lang` | string | `"en"` or `"vi"` — drives B2 final-suffix wording (`Final` vs `Cuối`) |
+| `audience` | string | locked at D0 — one of `"exec"`, `"practitioner"`, `"operator"`, `"customer"`, or free-text. Drives every framing decision downstream (Z1 lens, Z2 flow, item/feature vocabulary). |
 | `domain_notes` | string | free-text summary the AI builds during Phase 2 (Domain Discovery); drives propose-step for Z1/Z2/Z3 |
 
 ### `layout`
