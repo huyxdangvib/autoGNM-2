@@ -8,6 +8,18 @@ A GNM is a **WHAT × TODO** matrix. WHAT goes on Zone 1 (rows, items, nouns). TO
 
 The matrix is a **thinking tool**, not a record. Its purpose is to force the analyst to confront every WHAT × TODO intersection and decide what belongs there. Empty cells defeat the tool's purpose.
 
+## The audience axiom — GNM is a standardized language
+
+A GNM has **no target audience**. It is a *standardized language* designed so that **everyone** in the organization — analyst, executive, engineer, board member — can look at the same artifact and read the same idea. The whole point is universal legibility.
+
+This means:
+- Never ask "who is this for?" — the answer is always "everyone, by design".
+- Never tailor items/features to a persona — that breaks the standardization.
+- Never accept "the operations team will find this useful" as a structural justification — that's a stakeholder argument, not a strategy argument.
+- If a GNM only makes sense to one team, it's wrong. Redo the framing.
+
+This axiom is upstream of the framing axiom below: framing must be business-value (universal language) instead of audience or org (single-reader optimization).
+
 ## The framing axiom — business value, always
 
 Every GNM is a **strategy tool**. The organizing axes (Zone 1 items, Zone 2 features) must always be framed around **business value / monetization** — how the thing makes money, saves money, reduces risk, or opens new markets.

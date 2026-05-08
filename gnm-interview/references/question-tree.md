@@ -49,7 +49,7 @@ Templates (all monetization-framed):
 | "What outcomes signal this is working? What numbers move?" | Helps surface features (TODO axis) as outcome-driving actions |
 
 **Anti-templates — never use these:**
-- ❌ "Who's the audience? Who reads this?" → produces audience-based items
+- ❌ "Who's the audience? Who reads this?" → A GNM is a *standardized language* — audience is always "everyone, by design". The question is conceptually meaningless. Asking it produces persona-targeted items that defeat the universal-legibility purpose.
 - ❌ "Which teams own this?" → produces org-chart items
 - ❌ "What's the tech stack / data flow?" → produces operational items
 - ❌ "How is it organized today?" → bakes in the existing structure instead of designing one
