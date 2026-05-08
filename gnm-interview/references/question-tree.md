@@ -1,186 +1,195 @@
-# Question Tree — canonical interview sequence (MVP, L1)
+# Question Tree — domain-driven interview (MVP, L1)
 
-The interview follows a fixed sequence. The AI computes the next question by inspecting which fields in `workspace/spec.json` are still missing or empty. Render triggers are marked **[RENDER]** — call `bash scripts/render.sh` after the user's answer is written back.
+> **Core principle:** The AI never asks the user structural questions ("how many items?", "list the features"). Those assume the user already knows GNM. Instead the AI asks **domain questions** ("who uses this? what work happens here?"), then **proposes the GNM structure itself** and lets the user confirm, edit, or push back.
+>
+> The user's job is domain knowledge. The AI's job is structure. The 8 push-back triggers from `pushback-triggers.md` apply to the AI's own proposals (the AI must self-check before showing a proposal) and to user overrides of valid structure.
 
-Wording below is a starting template; adapt to user's tone. EN and VI both shown for the questions the user actually sees.
+The interview computes the next question by inspecting which spec fields are still missing. Render triggers are marked **[RENDER]** — call `bash scripts/render.sh` after the user's answer is written back.
 
 ---
 
 ## Phase 0 — Boot
 
 On `/gnm-interview` invocation:
-1. If `workspace/spec.json` exists, ask: "Resume previous session, or start fresh?" If fresh, archive the old one to `workspace/archive/{timestamp}-spec.json`.
-2. Otherwise, create a new empty spec stub with `schema_version: "gnm-interview/1.0"` and `gnm.level: 1, gnm.is_final: true`.
-3. Tell the user: "I'll ask one question at a time and we'll build the GNM together. Your live `.xlsx` updates after each meaningful answer in `workspace/current.xlsx`."
+1. If `workspace/spec.json` exists, ask: "Resume previous session, or start fresh?" Archive old to `workspace/archive/{timestamp}-spec.json` if fresh.
+2. Otherwise, create empty spec stub with `schema_version: "gnm-interview/1.0"`, `gnm.level: 1`, `gnm.is_final: true`.
+3. Tell user: "I'll ask about your domain, then propose the GNM structure. Live `.xlsx` updates at `workspace/current.xlsx`."
 
 ---
 
 ## Phase 1 — Bootstrap (B1–B4)
 
+Short identifying questions only. No structure yet.
+
 | # | EN | VI | Validation | Spec field |
 |---|---|---|---|---|
 | B1 | "English or Tiếng Việt?" | (same) | enum `en` / `vi` | `session.lang` |
-| B2 | "What's this GNM about, in one sentence?" | "GNM này nói về điều gì, tóm tắt một câu?" | reject < 5 words or vague placeholders | `gnm.purpose` |
-| B3 | "3-letter uppercase code? (e.g. ESD, MRC)" | "Mã 3 ký tự viết hoa? (ví dụ: ESD, MRC)" | regex `^[A-Z]{3}$`; if 4+ chars given, propose 2 truncations | `gnm.code` |
+| B2 | "What's this GNM about, in one sentence?" | "GNM này nói về điều gì, tóm tắt một câu?" | reject < 5 words; if vague, suggest a candidate sentence and let user accept | `gnm.purpose` |
+| B3 | "3-letter uppercase code? (e.g. FDM, MRC)" | "Mã 3 ký tự viết hoa? (ví dụ: FDM, MRC)" | regex `^[A-Z]{3}$`; if longer, propose 2 truncations | `gnm.code` |
 | B4 | "Full GNM name? (becomes the title cell)" | "Tên đầy đủ của GNM? (sẽ thành ô tiêu đề)" | non-empty, ≤ 60 chars | `gnm.name` |
 
-After B4 → **[RENDER]** empty shell. Tell user: "This is L1 (root). Cascade to deeper levels is v2."
+After B4: tell user "L1 (root); cascade is v2." No render yet — renderer needs `n ≥ 1` and `f ≥ 1`.
 
 ---
 
-## Phase 2 — Zone 1 (Items)
+## Phase 2 — Domain discovery (D-questions)
 
-### Z1.1 — count
+The AI asks 2–4 open-ended questions about the **domain** of this GNM, not its structure. Just enough to propose Zone 1 + Zone 2 confidently.
 
-- **EN:** "How many items on the WHAT axis? (typically 2–7)"
-- **VI:** "Bao nhiêu hạng mục trên trục WHAT? (thường 2–7)"
-- **Validation:** int ≥ 1
-- **Push-back:** trigger #8 if `n=1`; soft challenge if `n > 9`
-- **Field:** `layout.n`
+The AI **decides** which D-questions to ask based on the purpose statement from B2. Some templates:
 
-### Z1.2 — names
+| Template | Use when |
+|---|---|
+| "Who's the audience for this GNM? Who reads it, who acts on it?" | Always — drives perspective |
+| "What kinds of {topic-from-B2} does it cover? Give a few examples." | When topic is concrete (products, datasets, channels) |
+| "How is it organized today — by domain, by team, by lifecycle, or something else?" | When grouping is unclear |
+| "What's the daily/quarterly work that happens around this?" | Helps surface features (TODO axis) |
+| "What problems is this GNM helping people solve?" | When B2 was vague |
 
-- **EN:** "List the {n} items, one per line."
-- **VI:** "Liệt kê {n} hạng mục, mỗi dòng một mục."
-- **Validation:** count matches n
-- **Push-back:** trigger #2 (verbs), trigger #7 (mixed perspective)
-- **Field:** `zone1.items[].l1`
+Stop asking when the AI feels it can propose Zone 1 + Zone 2 with reasonable confidence. **Don't drag this out.** Typical: 2 questions, sometimes 3, rarely 4.
 
-### Z1.3 — perspective
-
-- **EN:** "What perspective ties these together? (product line / customer segment / lifecycle stage / channel / region / …)"
-- **VI:** "Lăng kính chung của các hạng mục là gì? (dòng sản phẩm / phân khúc khách hàng / giai đoạn vòng đời / kênh / khu vực / …)"
-- **Validation:** non-empty
-- **Field:** `zone1.perspective`
-
-### Z1.4 — confirm
-
-- **EN:** "Confirm Zone 1: {item list}. Proceed?"
-- **VI:** "Xác nhận Zone 1: {danh sách}. Tiếp tục?"
-- **On yes:** **[RENDER]** Zone 1 stub.
+**Spec impact:** the AI writes a `session.domain_notes` (plain string, not a structural field) summarizing what it learned. This drives the propose step.
 
 ---
 
-## Phase 3 — Zone 2 (Features)
+## Phase 3 — Zone 1 (propose → confirm)
 
-### Z2.1 — count
+The AI proposes:
+- **Items** (4–7 by default) — concrete nouns drawn from D-question answers
+- **Perspective** (one phrase: "data domain", "customer segment", "lifecycle stage", …)
 
-- **EN:** "How many features on the TODO axis? (1–5)"
-- **VI:** "Bao nhiêu tính năng trên trục TODO? (1–5)"
-- **Validation:** int 1..5
-- **Push-back:** trigger #4 if `f=1`
-- **Field:** `layout.f`
+Format:
+```
+Mình đề xuất Zone 1 (trục WHAT):
 
-### Z2.2 — names
+  Perspective: data domain
+  Items:
+    1. {item}
+    2. {item}
+    3. {item}
+    4. {item}
 
-- **EN:** "List the {f} features."
-- **VI:** "Liệt kê {f} tính năng."
-- **Validation:** count matches f
-- **Push-back:** trigger #5 (WHAT-not-TODO), trigger #3 (mirror items)
-- **Field:** `zone2.features`
+Bạn confirm, sửa (vd "đổi item 2 thành X"), hay muốn mình propose lại?
+```
 
-### Z2.3 — feature group header
+User options:
+- `ok` / `confirm` → write to spec, **[RENDER]** Z1 stub
+- "đổi {N} thành {X}" → swap one item
+- "thêm {Y}" / "bỏ {N}" → add/remove
+- "propose lại với perspective {Z}" → AI re-proposes
+- "let me list myself" → AI accepts user's list, but applies pushback triggers #2 (verbs) and #7 (mixed perspective) to the user's list
 
-- **EN:** "What's the feature group name? (header for the TODO axis — e.g. 'Operations', 'Annual Calendar')"
-- **VI:** "Tên nhóm tính năng? (tiêu đề trục TODO — ví dụ 'Vận hành', 'Lịch năm')"
-- **Validation:** non-empty
-- **Field:** `zone2.feature_group`
-- **On answer:** **[RENDER]** Z1 + Z2 frame, empty Z3.
+Self-check before proposing (AI must apply triggers to its own proposal):
+- No verb-items (trigger #2)
+- 2 ≤ count ≤ 7 (trigger #8)
+- Coherent perspective (trigger #7)
+- Not the same taxonomy AI plans to use for Z2 (trigger #3)
+
+If the AI can't satisfy these, it asks one more D-question instead of proposing.
+
+**Spec fields:** `layout.n`, `zone1.items[].l1`, `zone1.perspective`.
 
 ---
 
-## Phase 4 — Zone 3 (Cells, n × f)
+## Phase 4 — Zone 2 (propose → confirm)
 
-Loop over each cell `(i, j)` in row-major order.
+Same model. AI proposes:
+- **Features** (2–4 by default — single-feature is legacy)
+- **Feature group** (header, e.g. "Operations", "Data Lifecycle")
 
-For each cell:
+Format:
+```
+Mình đề xuất Zone 2 (trục TODO):
 
-- **EN:** "*{item_i}* × *{feature_j}* — what value or engine goes here?
-  - Free text for a value
-  - `engine: <name>` for a hyperlink-style engine
-  - `skip` to leave as `—`
-  - `…` to come back later"
-- **VI:** "*{item_i}* × *{feature_j}* — giá trị hoặc engine ở đây là gì?
-  - Văn bản tự do để nhập giá trị
-  - `engine: <tên>` cho engine tham chiếu
-  - `skip` để để trống `—`
-  - `…` để quay lại sau"
-- **Validation:** non-empty after re-prompt; reject `…` at finalize
-- **Push-back:** trigger #1 (empty), trigger #6 (vague engine)
-- **Field:** `zone3[i][j]`
+  Feature group: Data Lifecycle
+  Features: Ingestion → Modeling → Consumption
+
+Confirm/sửa/propose lại?
+```
+
+Self-check before proposing:
+- f ≥ 2 (trigger #4 — never propose f=1)
+- Features are verbs/perspectives, not nouns (trigger #5)
+- Features aren't mirror of items (trigger #3)
+- Features form a coherent flow (lifecycle, pillars, temporal)
+
+User confirm → **[RENDER]** Z1 + Z2 frame, empty Z3.
+
+**Spec fields:** `layout.f`, `zone2.features`, `zone2.feature_group`.
+
+---
+
+## Phase 5 — Zone 3 (propose where possible, ask where not)
+
+Loop over each cell `(i, j)` in row-major order. For each cell:
+
+1. **AI tries to propose first.** If the AI has a plausible guess from domain notes (e.g. for `Finance DataMart × Modeling`, plausible guess "Star schema design"), propose it: *"Cho {item} × {feature}, mình đề xuất: `{proposed value or engine}`. Confirm/sửa/skip?"*
+2. **If AI has no plausible guess**, ask: *"Cho {item} × {feature}, ô này nên là gì? (giá trị, engine: tên, hoặc skip để để '—')"*
+3. User options:
+   - `ok` / confirm
+   - free text → overwrite proposal
+   - `engine: <name>` → recorded as engine
+   - `skip` → recorded as `—`
+   - `…` → placeholder, comes back later
+
+Self-check on every proposal:
+- No vague engine names (trigger #6: not `System`, `Tool`, `Process` standalone)
+- ≤ 50 chars
 
 **[RENDER]** after every full row (every f cells filled).
 
----
-
-## Phase 5 — Zone 4 (Conso engines, n)
-
-Loop over each item.
-
-- **EN:** "For row *{item_i}*, what's the consolidated engine? (one engine summarizing all features for that row, ≤ 50 chars)"
-- **VI:** "Cho dòng *{item_i}*, engine tổng hợp là gì? (một engine tóm gọn cả {f} tính năng, tối đa 50 ký tự)"
-- **Validation:** non-empty
-- **Push-back:** trigger #6 (vague). Custom check: must differ from any Z3 cell in that row — if identical, "Is row *{item_i}* really just feature *{feature_j}*?"
-- **Field:** `zone4[i]`
-
-**[RENDER]** after each Z4 entry.
+**Spec field:** `zone3[i][j]`.
 
 ---
 
-## Phase 6 — Zones 5–9 (Aggregation rows, optional)
+## Phase 6 — Zone 4 (propose Conso engines)
 
-Tell user: "Now the All / Common aggregation rows. These are skippable — type `skip` to leave a cell blank. Defaults are 2 'All' rows and 2 'Common' rows."
+For each item i, the AI proposes the consolidated engine for that row:
+
+> "Cho dòng *{item_i}*, engine tổng hợp: `{proposed engine}`. Confirm/sửa?"
+
+Self-check:
+- Differs from any single Z3 cell in that row
+- ≤ 50 chars, self-descriptive (trigger #6)
+
+User confirm → **[RENDER]**.
+
+**Spec field:** `zone4[i]`.
+
+---
+
+## Phase 7 — Zones 5–9 (propose with skip-default)
+
+The AI tells user: *"Bây giờ đến các dòng aggregation (All / Common). Mình sẽ đề xuất từng ô — bạn confirm, sửa, hoặc skip để để trống."*
 
 Defaults: `layout.a = 2`, `layout.c = 2`.
 
-### Z5 — All cluster × feature columns (a × f)
+Loop in this order, per cell, AI proposes (or marks "no plausible proposal — skip?"):
 
-For each row r in 1..a, for each feature j in 1..f:
-- **EN:** "All-cluster row {r} × *{feature_j}*: aggregation engine? (or `skip`)"
-- **VI:** "Dòng All số {r} × *{feature_j}*: engine tổng hợp? (hoặc `skip`)"
-- **Field:** `zone5[r-1][j-1]`
+| Phase | Position | AI proposal source |
+|---|---|---|
+| Z5 | All-cluster row 1, per feature column | aggregate engine for that feature |
+| Z5 | All-cluster row 2, per feature column | secondary aggregate or empty |
+| Z6 | All-cluster row 1, Conso column | overall conso engine |
+| Z6 | All-cluster row 2, Conso column | usually empty |
+| Z7 | All-cluster row 1, extended cols | lateral references (strategy/org) |
+| Z8 | Common-cluster row 1, Conso col | parent/peer reference |
+| Z9 | Common-cluster row 1, extended cols | other common refs |
 
-### Z6 — All cluster × Conso col (a)
+When AI has no plausible guess, ask: *"Common row 1 — engine tham chiếu cha/peer? (skip để bỏ qua)"*.
 
-For each row r in 1..a:
-- **EN:** "All-cluster row {r}: overall conso engine? (or `skip`)"
-- **VI:** "Dòng All số {r}: engine tổng hợp toàn diện? (hoặc `skip`)"
-- **Field:** `zone6[r-1]`
-
-### Z7 — All cluster × extended (Mở rộng) cols (a × 2)
-
-For each row r in 1..a:
-- **EN:** "All-cluster row {r}: extended engines [left, right]? (or `skip`)"
-- **VI:** "Dòng All số {r}: engine mở rộng [trái, phải]? (hoặc `skip`)"
-- **Field:** `zone7[r-1]` as `[left, right]`
-
-### Z8 — Common cluster × Conso col (c)
-
-For each row r in 1..c:
-- **EN:** "Common-cluster row {r}: parent / peer reference engine? (or `skip`)"
-- **VI:** "Dòng Common số {r}: engine tham chiếu cha/ngang hàng? (hoặc `skip`)"
-- **Field:** `zone8[r-1]`
-
-### Z9 — Common cluster × extended cols (c × 2)
-
-For each row r in 1..c:
-- **EN:** "Common-cluster row {r}: other common engines [left, right]? (or `skip`)"
-- **VI:** "Dòng Common số {r}: engine common khác [trái, phải]? (hoặc `skip`)"
-- **Field:** `zone9[r-1]` as `[left, right]`
-
-**[RENDER]** after each row of Z5/Z7/Z9 (per-row, not per-cell). Z6 and Z8 render after each entry.
+**[RENDER]** after each row of Z5/Z7/Z9; after each Z6/Z8 entry.
 
 ---
 
-## Phase 7 — Finalize (F1)
+## Phase 8 — Finalize (F1)
 
-- **EN:** "Done. Final render? [Y/n]"
-- **VI:** "Xong. Render bản cuối? [Y/n]"
-- **On yes:**
-  1. Reject if any `zone3` cell is `…` (placeholder) — list the cells.
+- *"Render bản cuối? [Y/n]"*
+- On yes:
+  1. Reject if any `zone3` cell is `…`. List the cells.
   2. **[RENDER]** to `workspace/{code}-L{level}F-gnm.xlsx`.
-  3. Save `transcript.md` to same directory as the final .xlsx.
-  4. Print summary: warnings count, file path, sheet name.
+  3. Save `transcript.md` next to the final .xlsx.
+  4. Print: warnings count, file path, sheet name.
 
 ---
 
@@ -188,30 +197,41 @@ For each row r in 1..c:
 
 User can interrupt at any phase:
 
-- **"Change Zone 1 item 2 to X"** → AI edits `zone1.items[1].l1`, runs **[RENDER]**, asks "Engines in row 2 still valid? (Z3 row 2: {cells})". If user wants to redo Z3 for that row, loop back into Phase 4 for `(i=1, j=0..f-1)`.
-- **"Change f to 4"** → AI extends `zone2.features` (asks for the new feature name), pads `zone3[*]` with `…`, rerenders, then loops back into Phase 4 to fill the new column.
-- **"Change n to 3"** (was 4) → AI asks which item to drop, removes it from `zone1.items`, `zone3`, `zone4`, rerenders.
-- **"Show me what you have"** → render current spec, list field-fill status: `Z1 ✓ Z2 ✓ Z3 partial (5/12 cells) Z4 ✗ Z5–9 ✗`.
+- **"Change item 2 to X"** → AI edits `zone1.items[1].l1`, **[RENDER]**, asks "Z3 row 2 still valid? Cells: {list}". User confirms or asks AI to re-propose.
+- **"Add a feature 'Quality'"** → AI extends `zone2.features`, pads `zone3[*]` with `…`, **[RENDER]**, then propose-loops the new column.
+- **"Drop item 2"** → AI removes from `zone1.items`, `zone3`, `zone4`, **[RENDER]**.
+- **"Show me what you have"** → render current spec, list field-fill status: `Z1 ✓ Z2 ✓ Z3 partial (5/12) Z4 ✗ Z5–9 ✗`.
+- **"Re-propose Z2"** → AI re-runs Phase 4 with current domain notes.
 
 ---
 
-## Field-fill state machine (for AI's question-picking logic)
+## Push-back direction (inverted vs structural-questions model)
 
-The AI determines the next question by inspecting spec fields in this priority order:
+Old model: user gives raw answer, AI checks against rules, pushes back.
+
+New model:
+- **AI's proposal** is self-checked against all 8 triggers BEFORE being shown. The AI never proposes a structural violation.
+- **User overrides** still trigger the 2-step re-confirmation (e.g. user says "I want item: 'Manage Reports'" — AI fires trigger #2, asks for re-confirm, logs warning if user insists).
+- **User pushes back on AI's proposal** → AI asks one more domain question and re-proposes. Not a logged warning — just iteration.
+
+The `warnings[]` log is reserved for user-overridden rule violations only.
+
+---
+
+## Field-fill state machine
+
+The AI determines the next phase by inspecting these fields in priority order:
 
 1. `session.lang` empty → B1
 2. `gnm.purpose` empty → B2
 3. `gnm.code` empty → B3
 4. `gnm.name` empty → B4
-5. `layout.n` empty → Z1.1
-6. `zone1.items` length < n → Z1.2
-7. `zone1.perspective` empty → Z1.3
-8. `layout.f` empty → Z2.1
-9. `zone2.features` length < f → Z2.2
-10. `zone2.feature_group` empty → Z2.3
-11. any `zone3[i][j]` is null/`…` → Phase 4 loop
-12. any `zone4[i]` is null → Phase 5 loop
-13. user hasn't been offered Z5–9 yet → Phase 6 entry
-14. user typed `done` or all Z5–9 cells answered/skipped → F1
+5. `session.domain_notes` empty/insufficient → Phase 2 (D-questions)
+6. `layout.n == 0` → Phase 3 (propose Z1)
+7. `layout.f == 0` → Phase 4 (propose Z2)
+8. any `zone3[i][j]` is null/`…` → Phase 5 (per-cell propose-or-ask)
+9. any `zone4[i]` is null → Phase 6 (propose Conso)
+10. user hasn't been offered Z5–9 yet → Phase 7 entry
+11. user typed `done` or all Z5–9 cells answered/skipped → F1
 
-Skipping forward: user can say "go to Z3" — AI auto-fills missing prior fields with sensible defaults (and asks "is that OK?") then jumps to Z3.
+User can jump phases ("go to Z3") — AI auto-fills missing prior fields with proposals + asks "OK?" before jumping.

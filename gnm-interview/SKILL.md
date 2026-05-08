@@ -8,7 +8,9 @@ model_target: Claude Opus 4+
 
 # GNM Interview — Conversational Builder v1.0.0
 
-Walk a VIB analyst through building a GNM Excel workbook by asking one question at a time. After each meaningful answer, regenerate `workspace/current.xlsx` so the user watches their thinking take shape. When the user gives a structurally-poor answer, push back with the rule citation and 2-step re-confirmation — never silently accept.
+Walk a VIB analyst through building a GNM Excel workbook. Ask **domain questions** ("who uses this? what work happens here?"), then **propose the GNM structure yourself** — items, features, perspective, cell content — and let the user confirm or push back. Never ask the user structural questions like "how many items?" or "list the features"; those defeat the skill's purpose.
+
+The user provides domain knowledge. The AI provides structure. After each meaningful answer the live `.xlsx` regenerates so the user watches the GNM take shape. When a user override would violate a structural rule, apply the 2-step re-confirmation flow — but never push back on user input that the AI itself is responsible for inferring.
 
 **Scope:** single-sheet Level-1 GNMs. Cascade (multi-sheet) is v2. Existing-GNM review and TypeScript mining live in sibling skills (`/gnm`, `/gnm-miner`).
 
@@ -27,9 +29,11 @@ Walk a VIB analyst through building a GNM Excel workbook by asking one question 
    - `references/level-taxonomy.md` — integer-level + `is_final` rules
    - `references/glossary-vi.md` — only when `session.lang == "vi"`
 
-3. **Ask one question at a time** following the question tree. Determine the next question by inspecting which spec fields are still empty (state machine in `question-tree.md` §"Field-fill state machine").
+3. **Phase 1 (B1–B4)** — short bootstrap questions (lang, purpose, code, name). One at a time.
 
-4. **Validate the user's answer** mechanically (regex / range / count) and against the 8 push-back triggers. On trigger, follow the 4-step protocol:
+4. **Phase 2 (Domain Discovery)** — ask 2–4 open-ended **domain** questions to gather enough context to propose Zone 1 + Zone 2. Stop when you can propose with reasonable confidence. Don't drag it out.
+
+5. **Phases 3–7 (Propose → Confirm)** — for Z1, Z2, Z3, Z4, Z5–9: AI **proposes** the structure / content based on domain notes. User confirms, edits ("change item 2 to X"), asks for a re-proposal, or overrides explicitly. The 8 push-back triggers are applied by the AI **to its own proposals before showing them** — never propose a structural violation. User overrides that violate triggers go through 2-step re-confirmation:
    - State the rule + cite the user's evidence
    - Propose 2 concrete alternatives
    - If user insists: restate, ask for `yes` / `có` re-confirmation
@@ -91,5 +95,6 @@ User: ESD
 - **Bilingual** by user choice (B1) — English or Vietnamese; technical anchors stay English regardless.
 - **One question at a time** — never batch.
 - **Terse** — state, ask, wait. No long explanations unless the user asks "why?"
+- **Domain-driven** — ask about the user's world, then propose the GNM. Never ask "how many items?" or "what perspective?" — derive these.
 - **Push back, don't lecture** — name the rule, cite the evidence, offer 2 alternatives. That's it.
 - **Vietnamese tone** uses softeners (`hơi lăn tăn rằng…`, `bạn có chắc không?`) — direct translation sounds rude.

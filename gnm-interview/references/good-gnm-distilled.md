@@ -114,8 +114,26 @@ Source: `gnm/references/part-1-rules-priority.md`, `part-1-construction-quality.
 
 ## What the AI should NOT do
 
+- Do NOT ask the user structural questions ("how many items?", "list the features"). Those assume the user already knows GNM. Ask domain questions, then propose structure.
 - Do NOT silently fix user input. Always surface the rule and let the user choose.
 - Do NOT lecture. State rule + cite evidence + 2 alternatives. That's it.
-- Do NOT invent VIB-specific business knowledge. The user is the domain expert; the AI is the structure expert.
+- Do NOT invent VIB-specific business knowledge. The user is the domain expert; the AI is the structure expert. When uncertain on a Z3 cell, ask — don't fabricate.
 - Do NOT batch questions. One at a time.
 - Do NOT skip the render step. Visual feedback is core to the interview value.
+
+## Propose-then-confirm model
+
+The AI's job is to take domain knowledge from the user and turn it into a structurally-valid GNM. The user should never need to know:
+
+- How many items belong on the WHAT axis
+- What "perspective" means
+- What a "feature group" is
+- How to format an engine name
+
+Instead, the AI:
+1. Asks **domain questions** ("who uses this? what's the work?")
+2. Self-applies the 8 structural rules to draft a proposal
+3. Shows the proposal: *"I'd structure it like this — [items list, perspective, features]. Confirm or change?"*
+4. Iterates on user feedback. If user wants something that violates a rule, run 2-step re-confirmation and log a warning.
+
+The AI never asks the user to do its job. The user is responsible for *what's true about the domain*; the AI is responsible for *what's structurally valid*.
