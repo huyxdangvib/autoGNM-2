@@ -64,13 +64,63 @@ Stop asking when the AI can propose Z1+Z2 under monetization framing. Typical: 2
 
 ---
 
-## Phase 3 — Zone 1 (propose → confirm)
+## Phase 3 — Zone 1 (two-level propose → confirm)
 
-The AI proposes:
-- **Items** (4–7 by default) — concrete nouns framed by **business-value lens** (revenue impact area, monetization mechanism, value-chain stage). Never by audience or org.
-- **Perspective** (one phrase) — must name a *value lens*: e.g. "monetization technique", "revenue-impact area", "business-value pillar", "P&L lever". Not "team", "audience", "data domain" (these are operational).
+**Why two levels:** rows decompose as *lens → enumeration*. Picking the lens first makes the framing debatable BEFORE the AI commits to an item list. Without it, a bad framing only surfaces after the user sees 4 wrong items, which is harder to fix.
 
-> **Self-check before proposing:** if the proposed items would just as easily appear on an org chart or audience map, redo the proposal under monetization framing. Example: for "AI & Data" department — wrong: {Research, Productization, Deployment}; right: {Revenue Uplift via Personalization, Cost Reduction via Automation, Risk Reduction via Fraud Detection, New AI-as-a-Service Revenue}.
+### Phase 3.1 — Row lens (propose)
+
+The AI proposes a **value lens** for the WHAT axis. Candidate lenses (pick the best fit; list 1–2 runner-ups for transparency):
+
+| Lens | Use when |
+|---|---|
+| **P&L lever** | Topic touches revenue / cost / risk on a financial statement |
+| **Monetization technique** | Topic is a capability with multiple ways to convert into money |
+| **Revenue-impact area** | Topic spans business units or product lines that each generate revenue |
+| **Value-chain stage** | Topic is a horizontal capability supporting upstream/downstream |
+| **Customer-value pillar** | Topic is customer-facing and value emerges across customer segments |
+
+Format:
+```
+Mình đề xuất frame các dòng theo lens "P&L lever" (alt: monetization technique).
+Lý do: từ domain notes, FDM tác động trực tiếp đến NIM, fee income, cost-to-serve…
+
+OK với lens này hay đổi sang alt?
+```
+
+User options: `ok`, `dùng monetization technique thay cho P&L lever`, `propose lens khác`.
+
+**Spec field:** `zone1.perspective` (the lens phrase).
+
+### Phase 3.2 — Row enumeration (propose)
+
+After lens is locked, the AI proposes **items** (4–7) under that lens.
+
+Format:
+```
+Dưới lens "P&L lever", 4 dòng:
+  1. NIM optimization
+  2. Fee income visibility
+  3. Cost-to-serve reduction
+  4. Risk-weighted asset efficiency
+
+Confirm/sửa/propose lại?
+```
+
+User options: `ok`, "đổi item 2 thành X", "thêm Y", "bỏ N", "propose lại với lens khác" (jumps back to 3.1).
+
+Self-check before proposing items:
+- **Lens-consistent** — every item is a clean instance of the locked lens (NOT a team, NOT a tech component)
+- No verb-items (trigger #2)
+- 2 ≤ count ≤ 7 (trigger #8)
+- Coherent under the lens (trigger #7)
+- Not the same taxonomy AI plans to use for Z2 (trigger #3)
+
+If lens makes good items hard to enumerate (< 3 candidates), the AI should propose a different lens instead — that's a signal the lens is wrong.
+
+After confirm → **[RENDER]** Z1 stub.
+
+**Spec fields:** `layout.n`, `zone1.items[].l1`, `zone1.perspective`.
 
 Format:
 ```
@@ -106,28 +156,57 @@ If the AI can't satisfy these, it asks one more D-question (monetization-framed)
 
 ---
 
-## Phase 4 — Zone 2 (propose → confirm)
+## Phase 4 — Zone 2 (two-level propose → confirm)
 
-Same model. AI proposes:
-- **Features** (2–4 by default — single-feature is legacy)
-- **Feature group** (header, e.g. "Operations", "Data Lifecycle")
+Same pattern: pick a flow type first (= feature group), then enumerate features along it.
+
+### Phase 4.1 — Column flow (propose)
+
+Candidate flows:
+
+| Flow | Stages (typical) | Use when |
+|---|---|---|
+| **Value-creation arc** | Discover → Activate → Measure → Optimize | Capability surfaces value; needs a closed loop |
+| **Customer journey** | Acquire → Convert → Retain → Expand | Customer-facing, monetization through CLV |
+| **P&L stages** | Plan → Earn → Cost → Risk-adjust | Financial outcome decomposition |
+| **Decision loop** | Surface → Decide → Act → Measure | Information / analytics / decision-support topics |
+| **Strategic pillars** | Strategy → Execution → Control | High-level governance topics |
 
 Format:
 ```
-Mình đề xuất Zone 2 (trục TODO):
+Cột mình đề xuất theo flow "Decision loop" (alt: Value-creation arc).
+Lý do: FDM là analytics/decision-support → flow Surface → Decide → Act → Measure
+       sẽ surface đúng những gì FDM phải làm để value xuất hiện.
 
-  Feature group: Data Lifecycle
-  Features: Ingestion → Modeling → Consumption
-
-Confirm/sửa/propose lại?
+OK với flow này hay đổi?
 ```
 
-Self-check before proposing:
-- **Value-creation framing** — features are actions/phases that *translate items to business outcomes* (e.g. Discover → Activate → Measure → Optimize; Acquire → Convert → Retain → Expand). NOT technical lifecycle (Ingestion → Modeling → Storage), NOT org phases (Plan → Build → Run).
-- f ≥ 2 (trigger #4 — never propose f=1)
-- Features are verbs/perspectives, not nouns (trigger #5)
-- Features aren't mirror of items (trigger #3)
-- Features form a coherent business-value flow (value-creation arc, customer journey, P&L stages)
+**Spec field:** `zone2.feature_group` (the flow name, e.g. "Decision loop").
+
+### Phase 4.2 — Column enumeration (propose)
+
+After flow is locked, AI proposes the stages as features (typically 3–5):
+
+```
+Theo flow "Decision loop", 4 cột:
+  1. Surface insights
+  2. Inform decisions
+  3. Drive actions
+  4. Measure impact
+
+Confirm/sửa?
+```
+
+Self-check before proposing features:
+- **Flow-consistent** — features are stages of the locked flow, not a different taxonomy
+- f in 2..5 (trigger #4 — never propose f=1)
+- Verbs/perspectives, not nouns (trigger #5)
+- Not a mirror of items (trigger #3)
+- Form a coherent ordered flow (the LIST has a direction)
+
+After confirm → **[RENDER]** Z1 + Z2 frame, empty Z3.
+
+**Spec fields:** `layout.f`, `zone2.features`, `zone2.feature_group`.
 
 User confirm → **[RENDER]** Z1 + Z2 frame, empty Z3.
 
@@ -243,11 +322,15 @@ The AI determines the next phase by inspecting these fields in priority order:
 3. `gnm.code` empty → B3
 4. `gnm.name` empty → B4
 5. `session.domain_notes` empty/insufficient → Phase 2 (D-questions)
-6. `layout.n == 0` → Phase 3 (propose Z1)
-7. `layout.f == 0` → Phase 4 (propose Z2)
-8. any `zone3[i][j]` is null/`…` → Phase 5 (per-cell propose-or-ask)
-9. any `zone4[i]` is null → Phase 6 (propose Conso)
-10. user hasn't been offered Z5–9 yet → Phase 7 entry
-11. user typed `done` or all Z5–9 cells answered/skipped → F1
+6. `zone1.perspective` empty → Phase 3.1 (propose row lens)
+7. `layout.n == 0` → Phase 3.2 (propose row enumeration)
+8. `zone2.feature_group` empty → Phase 4.1 (propose column flow)
+9. `layout.f == 0` → Phase 4.2 (propose column enumeration)
+10. any `zone3[i][j]` is null/`…` → Phase 5 (per-cell propose-or-ask)
+11. any `zone4[i]` is null → Phase 6 (propose Conso)
+12. user hasn't been offered Z5–9 yet → Phase 7 entry
+13. user typed `done` or all Z5–9 cells answered/skipped → F1
 
 User can jump phases ("go to Z3") — AI auto-fills missing prior fields with proposals + asks "OK?" before jumping.
+
+If user rejects a lens at 3.1 or flow at 4.1, the AI clears the dependent enumeration (`zone1.items` / `zone2.features`) before re-proposing. Lens is upstream of items; never keep items locked when lens shifted.

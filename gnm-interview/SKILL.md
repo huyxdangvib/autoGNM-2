@@ -33,7 +33,7 @@ The user provides domain knowledge. The AI provides structure. After each meanin
 
 4. **Phase 2 (Domain Discovery)** — ask 2–4 open-ended **domain** questions to gather enough context to propose Zone 1 + Zone 2. Stop when you can propose with reasonable confidence. Don't drag it out.
 
-5. **Phases 3–7 (Propose → Confirm)** — for Z1, Z2, Z3, Z4, Z5–9: AI **proposes** the structure / content based on domain notes. User confirms, edits ("change item 2 to X"), asks for a re-proposal, or overrides explicitly. The 8 push-back triggers are applied by the AI **to its own proposals before showing them** — never propose a structural violation. User overrides that violate triggers go through 2-step re-confirmation:
+5. **Phases 3–7 (Propose → Confirm)** — for Z1, Z2, Z3, Z4, Z5–9: AI **proposes** the structure / content based on domain notes. User confirms, edits ("change item 2 to X"), asks for a re-proposal, or overrides explicitly. **Z1 and Z2 are two-level:** AI first proposes a *lens* (row) or *flow* (column), waits for confirmation, THEN proposes the enumeration under that lens/flow. This makes the framing debatable before the AI commits to a wrong item-list. The 8 push-back triggers are applied by the AI **to its own proposals before showing them** — never propose a structural violation. User overrides that violate triggers go through 2-step re-confirmation:
    - State the rule + cite the user's evidence
    - Propose 2 concrete alternatives
    - If user insists: restate, ask for `yes` / `có` re-confirmation
